@@ -16,6 +16,7 @@ function M.apply_to_config(config)
   }
 
   config.use_fancy_tab_bar = true
+  config.tab_bar_at_bottom = true
   config.show_tab_index_in_tab_bar = true
   config.switch_to_last_active_tab_when_closing_tab = true
   config.scrollback_lines = 50000
