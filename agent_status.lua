@@ -5,8 +5,15 @@ local M = {}
 
 local OPTIONS = {
   update_interval = 500,
-  tab_title = { enabled = false },
-  right_status = { enabled = false },
+  right_status = {
+    components = {
+      { type = 'badge', filter = 'waiting', label = 'waiting' },
+      { type = 'separator', text = ' | ' },
+      { type = 'badge', filter = 'working', label = 'working' },
+      { type = 'separator', text = ' | ' },
+      { type = 'badge', filter = 'idle', label = 'idle' },
+    },
+  },
   notifications = {
     enabled = true,
     on_waiting = true,
@@ -28,60 +35,8 @@ local OPTIONS = {
   },
 }
 
-local function pane_id_of(pane)
-  if pane.pane_id then
-    return pane.pane_id
-  end
-
-  local ok, pane_id = pcall(function()
-    return pane:pane_id()
-  end)
-
-  return ok and pane_id or nil
-end
-
-function M.apply_to_config(_config)
-  agent_deck.setup(OPTIONS)
-end
-
-function M.update_window(window)
-  for _, mux_tab in ipairs(window:mux_window():tabs()) do
-    for _, pane in ipairs(mux_tab:panes()) do
-      agent_deck.update_pane(pane)
-    end
-  end
-end
-
-function M.tab_states(panes)
-  local states = {}
-
-  for _, pane in ipairs(panes or {}) do
-    local pane_id = pane_id_of(pane)
-    if pane_id then
-      local state = agent_deck.get_agent_state(pane_id)
-      if state then
-        table.insert(states, {
-          pane_id = pane_id,
-          agent_type = state.agent_type,
-          status = state.status,
-        })
-      end
-    end
-  end
-
-  return states
-end
-
-function M.counts()
-  return agent_deck.count_agents_by_status()
-end
-
-function M.status_icon(status)
-  return agent_deck.get_status_icon(status)
-end
-
-function M.status_color(status)
-  return agent_deck.get_status_color(status)
+function M.apply_to_config(config)
+  agent_deck.apply_to_config(config, OPTIONS)
 end
 
 return M
