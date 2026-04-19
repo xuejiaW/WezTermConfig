@@ -2,6 +2,7 @@ local wezterm = require 'wezterm'
 local act = wezterm.action
 local platform = require 'platform'
 local pane_actions = require 'pane_actions'
+local tab_rename = require 'tab_rename'
 
 local M = {}
 
@@ -32,7 +33,7 @@ function M.apply_to_config(config)
     { key = 't', mods = platform.primary_mod, action = act.SpawnTab 'CurrentPaneDomain' },
     { key = 'w', mods = platform.primary_mod, action = tab_close_action },
     { key = 'x', mods = platform.direct_mods, action = act.EmitEvent(pane_actions.close_pane_event) },
-    { key = 'r', mods = platform.direct_mods, action = act.EmitEvent 'rename-current-tab' },
+    { key = 'r', mods = platform.direct_mods, action = act.EmitEvent(tab_rename.rename_event) },
     { key = '[', mods = platform.direct_mods, action = act.ActivateCopyMode },
 
     -- Previous/next GUI tab.
