@@ -1,5 +1,5 @@
 local wezterm = require 'wezterm'
-local codex_tab_state = require 'codex_tab_state'
+local agent_status = require 'agent_status'
 
 local M = {}
 
@@ -66,20 +66,6 @@ local function normalized_pane_title(pane)
   return title
 end
 
-local function codex_spinner_prefix(pane)
-  local title = pane and pane.title or ''
-  if not is_non_empty(title) then
-    return nil
-  end
-
-  local prefix = title:match('^(%S+)%s+.+$')
-  if prefix and not prefix:match('[%w]') then
-    return prefix
-  end
-
-  return nil
-end
-
 local function resolved_title(tab)
   local pane = tab.active_pane
   local explicit_title = tab.tab_title
@@ -87,16 +73,7 @@ local function resolved_title(tab)
     return explicit_title
   end
 
-  local is_codex = codex_tab_state.is_codex_pane(pane)
-  local vars = pane and pane.user_vars or {}
-  if is_codex then
-    local project = vars[codex_tab_state.user_vars.project]
-    if is_non_empty(project) then
-      return project
-    end
-  end
-
-  local pane_title = is_codex and normalized_pane_title(pane) or (pane and pane.title or nil)
+  local pane_title = normalized_pane_title(pane)
   if is_non_empty(pane_title) then
     return pane_title
   end
@@ -109,14 +86,26 @@ local function resolved_title(tab)
   return 'shell'
 end
 
+local function append_state_markers(elements, states)
+  for _, state in ipairs(states) do
+    table.insert(elements, {
+      Foreground = { Color = agent_status.status_color(state.status) },
+    })
+    table.insert(elements, {
+      Text = agent_status.status_icon(state.status),
+    })
+    table.insert(elements, {
+      Foreground = { Color = 'Default' },
+    })
+  end
+end
+
 function M.apply_to_config(_config)
-  wezterm.on('format-tab-title', function(tab, _tabs, _panes, config, _hover, max_width)
+  wezterm.on('format-tab-title', function(tab, _tabs, panes, config, _hover, max_width)
     local prefix = ' ' .. tab_index_prefix(tab, config)
-    local status = codex_tab_state.status_for_pane(tab.active_pane)
-    local spinner = status and status.name == 'running' and codex_spinner_prefix(tab.active_pane) or nil
     local title = resolved_title(tab)
-    local trailing_marker = spinner or (status and status.icon or nil)
-    local reserved = #prefix + 1 + (trailing_marker and 2 or 0)
+    local states = agent_status.tab_states(panes)
+    local reserved = #prefix + 1 + (#states * 2)
     local truncated_title = wezterm.truncate_right(title, math.max(max_width - reserved, 1))
 
     local elements = {
@@ -124,13 +113,8 @@ function M.apply_to_config(_config)
       { Text = truncated_title .. ' ' },
     }
 
-    if spinner then
-      table.insert(elements, { Text = spinner })
-      table.insert(elements, { Text = ' ' })
-    elseif status then
-      table.insert(elements, { Foreground = { Color = status.color } })
-      table.insert(elements, { Text = status.icon })
-      table.insert(elements, { Foreground = { Color = 'Default' } })
+    if #states > 0 then
+      append_state_markers(elements, states)
       table.insert(elements, { Text = ' ' })
     end
 
