@@ -11,6 +11,8 @@ function M.apply_to_config(config)
 
   config.color_scheme = 'OneHalfDark'
   config.font_size = 14.0
+  config.window_decorations = 'TITLE|RESIZE'
+  config.native_macos_fullscreen_mode = true
   config.window_frame = {
     font_size = 14.0,
   }

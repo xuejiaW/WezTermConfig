@@ -6,10 +6,25 @@ local tab_rename = require 'tab_rename'
 
 local M = {}
 
+local function upsert_key_binding(bindings, entry)
+    for index, binding in ipairs(bindings) do
+        if binding.key == entry.key and binding.mods == entry.mods then
+            bindings[index] = entry
+            return
+        end
+    end
+
+    table.insert(bindings, entry)
+end
+
 function M.apply_to_config(config)
+    local default_key_tables = wezterm.gui.default_key_tables()
+    local copy_mode = default_key_tables.copy_mode
+    local search_mode = default_key_tables.search_mode
     local tab_close_action = platform.is_windows and act.CloseCurrentTab {
         confirm = true
     } or act.DisableDefaultAssignment
+    local fullscreen_mods = platform.is_windows and 'CTRL|SHIFT' or 'CMD|CTRL'
     local primary_shift_mods = platform.primary_mod .. '|SHIFT'
     local move_tab_mods = platform.direct_mods .. '|SHIFT'
     local disable_tab_number_mods = {platform.primary_mod, 'CTRL|SHIFT'}
@@ -61,6 +76,10 @@ function M.apply_to_config(config)
         key = 't',
         mods = platform.primary_mod,
         action = act.SpawnTab 'CurrentPaneDomain'
+    }, {
+        key = 'f',
+        mods = fullscreen_mods,
+        action = act.ToggleFullScreen
     }, {
         key = 'w',
         mods = platform.primary_mod,
@@ -121,7 +140,56 @@ function M.apply_to_config(config)
         })
     end
 
+    upsert_key_binding(copy_mode, {
+        key = 'Escape',
+        mods = 'NONE',
+        action = wezterm.action_callback(function(window, pane)
+            local has_selection = window:get_selection_text_for_pane(pane) ~= ''
+
+            if has_selection then
+                window:perform_action(act.ClearSelection, pane)
+                window:perform_action(act.CopyMode 'ClearSelectionMode', pane)
+                return
+            end
+
+            window:perform_action(act.CopyMode 'Close', pane)
+        end)
+    })
+    upsert_key_binding(copy_mode, {
+        key = '/',
+        mods = 'NONE',
+        action = act.Search 'CurrentSelectionOrEmptyString'
+    })
+    upsert_key_binding(copy_mode, {
+        key = '/',
+        mods = 'SHIFT',
+        action = act.Search 'CurrentSelectionOrEmptyString'
+    })
+    upsert_key_binding(copy_mode, {
+        key = 'L',
+        mods = 'NONE',
+        action = act.CopyMode 'MoveToEndOfLineContent'
+    })
+    upsert_key_binding(copy_mode, {
+        key = 'n',
+        mods = 'NONE',
+        action = act.CopyMode 'NextMatch'
+    })
+    upsert_key_binding(copy_mode, {
+        key = 'N',
+        mods = 'NONE',
+        action = act.CopyMode 'PriorMatch'
+    })
+
+    upsert_key_binding(search_mode, {
+        key = 'Enter',
+        mods = 'NONE',
+        action = act.CopyMode 'AcceptPattern'
+    })
+
     config.key_tables = {
+        copy_mode = copy_mode,
+        search_mode = search_mode,
         resize_panes = {{
             key = 'h',
             action = act.AdjustPaneSize {'Left', 3}

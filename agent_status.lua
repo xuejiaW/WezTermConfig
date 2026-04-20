@@ -5,15 +5,7 @@ local M = {}
 
 local OPTIONS = {
   update_interval = 500,
-  right_status = {
-    components = {
-      { type = 'badge', filter = 'waiting', label = 'waiting' },
-      { type = 'separator', text = ' | ' },
-      { type = 'badge', filter = 'working', label = 'working' },
-      { type = 'separator', text = ' | ' },
-      { type = 'badge', filter = 'idle', label = 'idle' },
-    },
-  },
+  right_status = { enabled = false },
   notifications = {
     enabled = true,
     on_waiting = true,
@@ -37,6 +29,18 @@ local OPTIONS = {
 
 function M.apply_to_config(config)
   agent_deck.apply_to_config(config, OPTIONS)
+end
+
+function M.counts()
+  return agent_deck.count_agents_by_status()
+end
+
+function M.status_icon(status)
+  return agent_deck.get_status_icon(status)
+end
+
+function M.status_color(status)
+  return agent_deck.get_status_color(status)
 end
 
 return M
