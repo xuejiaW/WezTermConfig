@@ -28,6 +28,10 @@ function M.apply_to_config(config)
     local primary_shift_mods = platform.primary_mod .. '|SHIFT'
     local move_tab_mods = platform.direct_mods .. '|SHIFT'
     local disable_tab_number_mods = {platform.primary_mod, 'CTRL|SHIFT'}
+    local activate_copy_mode_action = act.Multiple {
+        act.ActivateCopyMode,
+        act.CopyMode 'ClearPattern'
+    }
 
     config.keys = { -- Disable WezTerm's default Alt+Enter fullscreen toggle.
     {
@@ -75,6 +79,10 @@ function M.apply_to_config(config)
     {
         key = 't',
         mods = platform.primary_mod,
+        action = act.DisableDefaultAssignment
+    }, {
+        key = 't',
+        mods = platform.direct_mods,
         action = act.SpawnTab 'CurrentPaneDomain'
     }, {
         key = 'f',
@@ -85,7 +93,7 @@ function M.apply_to_config(config)
         mods = platform.primary_mod,
         action = tab_close_action
     }, {
-        key = 'x',
+        key = 'w',
         mods = platform.direct_mods,
         action = act.EmitEvent(pane_actions.close_pane_event)
     }, {
@@ -104,7 +112,11 @@ function M.apply_to_config(config)
     }, {
         key = '[',
         mods = platform.direct_mods,
-        action = act.ActivateCopyMode
+        action = activate_copy_mode_action
+    }, {
+        key = 'x',
+        mods = 'CTRL|SHIFT',
+        action = activate_copy_mode_action
     }, -- Previous/next GUI tab.
     {
         key = 'h',
@@ -173,12 +185,12 @@ function M.apply_to_config(config)
     upsert_key_binding(copy_mode, {
         key = 'n',
         mods = 'NONE',
-        action = act.CopyMode 'NextMatch'
+        action = act.CopyMode 'PriorMatch'
     })
     upsert_key_binding(copy_mode, {
         key = 'N',
         mods = 'NONE',
-        action = act.CopyMode 'PriorMatch'
+        action = act.CopyMode 'NextMatch'
     })
 
     upsert_key_binding(search_mode, {
