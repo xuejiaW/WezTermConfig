@@ -42,21 +42,11 @@ function M.apply_to_config(config)
     {
         key = 'v',
         mods = platform.direct_mods,
-        action = act.SplitPane {
-            direction = 'Right',
-            size = {
-                Percent = 50
-            }
-        }
+        action = pane_actions.split_with_current_working_dir 'Right'
     }, {
         key = 's',
         mods = platform.direct_mods,
-        action = act.SplitPane {
-            direction = 'Down',
-            size = {
-                Percent = 50
-            }
-        }
+        action = pane_actions.split_with_current_working_dir 'Bottom'
     }, {
         key = 'h',
         mods = platform.direct_mods,
