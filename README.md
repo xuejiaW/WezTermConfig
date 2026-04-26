@@ -11,8 +11,10 @@ This repository contains the actively used WezTerm configuration from
 - `platform.lua`: minimal platform facts used by other modules
 - `keys.lua`: keyboard bindings
 - `mouse.lua`: mouse behavior
-- `events.lua`: named WezTerm events and tab-title formatting
-- `pane_actions.lua`: pane-close behavior that cooperates with vim/neovim
+- `agent_status.lua`: agent-deck plugin setup and status helpers
+- `status_area.lua`: right status contents for key tables and agent counts
+- `tab_rename.lua`: current-tab rename prompt event
+- `pane_actions.lua`: pane split and close behavior, including vim/neovim cleanup
 
 ## Maintenance Rules
 
