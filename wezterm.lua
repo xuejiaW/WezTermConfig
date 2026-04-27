@@ -3,6 +3,7 @@ local config = wezterm.config_builder()
 
 require('appearance').apply_to_config(config)
 require('shell').apply_to_config(config)
+require('launch_menu').apply_to_config(config)
 require('agent_status').apply_to_config(config)
 require('tab_rename').apply_to_config(config)
 require('status_area').apply_to_config(config)

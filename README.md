@@ -8,6 +8,8 @@ This repository contains the actively used WezTerm configuration from
 - `wezterm.lua`: thin entrypoint that assembles the config
 - `appearance.lua`: fonts, colors, tab bar, scrollback, reload behavior
 - `shell.lua`: default shell and environment bootstrapping
+- `launch_paths.lua`: common launch paths shared by tab and pane launchers
+- `launch_menu.lua`: launcher entries for opening new tabs in common paths
 - `platform.lua`: minimal platform facts used by other modules
 - `keys.lua`: keyboard bindings
 - `mouse.lua`: mouse behavior

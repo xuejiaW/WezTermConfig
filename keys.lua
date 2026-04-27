@@ -75,6 +75,13 @@ function M.apply_to_config(config)
         mods = platform.direct_mods,
         action = act.SpawnTab 'CurrentPaneDomain'
     }, {
+        key = 't',
+        mods = platform.direct_mods .. '|SHIFT',
+        action = act.ShowLauncherArgs {
+            flags = 'FUZZY|LAUNCH_MENU_ITEMS',
+            title = 'New tab in'
+        }
+    }, {
         key = 'f',
         mods = fullscreen_mods,
         action = act.ToggleFullScreen
