@@ -1,5 +1,6 @@
 local wezterm = require 'wezterm'
 local act = wezterm.action
+local launch_paths = require 'launch_paths'
 
 local M = {}
 M.close_pane_event = 'close-pane-with-editor-cleanup'
@@ -29,41 +30,68 @@ local function is_vim_process(process_name)
       or name == 'vi'
 end
 
-function M.split_with_current_working_dir(direction)
-  return wezterm.action_callback(function(_window, pane)
-    local args = {
-      direction = direction,
-      size = 0.5,
-    }
+local function split_pane(pane, direction, cwd, fallback_without_cwd)
+  local args = {
+    direction = direction,
+    size = 0.5,
+  }
 
-    local cwd = current_working_dir_path(pane)
-    if cwd then
-      args.cwd = cwd
-    end
+  if cwd then
+    args.cwd = cwd
+  end
 
-    local ok, new_pane = pcall(function()
-      return pane:split(args)
-    end)
+  local ok, new_pane = pcall(function()
+    return pane:split(args)
+  end)
 
-    if not ok and args.cwd then
-      local fallback_args = {
+  if not ok and args.cwd and fallback_without_cwd then
+    ok, new_pane = pcall(function()
+      return pane:split {
         direction = direction,
         size = 0.5,
       }
-      ok, new_pane = pcall(function()
-        return pane:split(fallback_args)
-      end)
-    end
+    end)
+  end
 
-    if not ok then
-      wezterm.log_error('failed to split pane: ' .. tostring(new_pane))
-      return
-    end
+  if not ok then
+    wezterm.log_error('failed to split pane: ' .. tostring(new_pane))
+    return
+  end
 
-    if new_pane then
-      new_pane:activate()
-    end
+  if new_pane then
+    new_pane:activate()
+  end
+end
+
+function M.split_with_current_working_dir(direction)
+  return wezterm.action_callback(function(_window, pane)
+    split_pane(pane, direction, current_working_dir_path(pane), true)
   end)
+end
+
+function M.split_with_launch_path(direction)
+  return act.InputSelector {
+    title = 'Split pane in',
+    choices = launch_paths.input_choices(),
+    fuzzy = true,
+    action = wezterm.action_callback(function(_window, pane, cwd)
+      if not cwd then
+        return
+      end
+
+      split_pane(pane, direction, cwd, false)
+    end),
+  }
+end
+
+function M.split_with_launch_path_or_current_working_dir(direction)
+  local choices = launch_paths.input_choices()
+
+  if #choices == 0 then
+    return M.split_with_current_working_dir(direction)
+  end
+
+  return M.split_with_launch_path(direction)
 end
 
 function M.apply_to_config(_config)

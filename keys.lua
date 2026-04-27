@@ -44,9 +44,17 @@ function M.apply_to_config(config)
         mods = platform.direct_mods,
         action = pane_actions.split_with_current_working_dir 'Right'
     }, {
+        key = 'v',
+        mods = platform.direct_mods .. '|SHIFT',
+        action = pane_actions.split_with_launch_path_or_current_working_dir 'Right'
+    }, {
         key = 's',
         mods = platform.direct_mods,
         action = pane_actions.split_with_current_working_dir 'Bottom'
+    }, {
+        key = 's',
+        mods = platform.direct_mods .. '|SHIFT',
+        action = pane_actions.split_with_launch_path_or_current_working_dir 'Bottom'
     }, {
         key = 'h',
         mods = platform.direct_mods,
