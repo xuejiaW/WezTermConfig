@@ -25,6 +25,49 @@ local OPTIONS = {
       inactive = '◌',
     },
   },
+  agents = {
+    copilot = {
+      patterns = { 'copilot' },
+      executable_patterns = {
+        '/copilot%-cli/',
+        '@github/copilot',
+        '/homebrew/bin/copilot',
+        '/copilot$',
+        '^copilot$',
+      },
+      argv_patterns = {
+        '@github/copilot',
+        'npx%s+@github/copilot',
+        'npx%s+copilot',
+        '^copilot%s',
+        '^copilot$',
+      },
+      title_patterns = {
+        'github copilot',
+        'copilot',
+      },
+      status_patterns = {
+        waiting = {
+          'esc to cancel',
+          'allow copilot',
+          'do you want to',
+          'approve',
+          '%(y/n%)',
+          '%(Y/n%)',
+          '%[y/n%]',
+          '%[Y/n%]',
+          '%(y/N%)',
+          '%(Y/N%)',
+          '%[y/N%]',
+          '%[Y/N%]',
+          ' Yes',
+          ' No',
+          'continue%?',
+          'proceed%?',
+        },
+      },
+    },
+  },
 }
 
 function M.apply_to_config(config)
