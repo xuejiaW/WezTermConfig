@@ -71,6 +71,10 @@ function M.apply_to_config(config)
         key = 'l',
         mods = platform.direct_mods,
         action = act.ActivatePaneDirection 'Right'
+    }, {
+        key = 'p',
+        mods = platform.direct_mods,
+        action = pane_actions.move_current_pane_to_new_tab()
     }, -- On macOS, leave Cmd+W to terminal apps such as Neovim by explicitly
     -- overriding WezTerm's default close-tab binding. Windows keeps Ctrl+W as a
     -- terminal-tab close shortcut.

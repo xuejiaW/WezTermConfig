@@ -94,6 +94,15 @@ function M.split_with_launch_path_or_current_working_dir(direction)
   return M.split_with_launch_path(direction)
 end
 
+function M.move_current_pane_to_new_tab()
+  return wezterm.action_callback(function(_window, pane)
+    local tab = pane:move_to_new_tab()
+    if tab then
+      tab:activate()
+    end
+  end)
+end
+
 function M.apply_to_config(_config)
   wezterm.on(M.close_pane_event, function(window, pane)
     if is_vim_process(pane:get_foreground_process_name()) then
