@@ -5,10 +5,22 @@ local launch_paths = require 'launch_paths'
 local M = {}
 M.close_pane_event = 'close-pane-with-editor-cleanup'
 
+local function normalize_file_path(path)
+  if wezterm.target_triple:find('windows') and path and path:match('^/[A-Za-z]:[\\/]') then
+    return path:sub(2)
+  end
+
+  return path
+end
+
 local function current_working_dir_path(pane)
   local cwd = pane:get_current_working_dir()
-  if cwd and cwd.scheme == 'file' then
-    return cwd.file_path
+  if not cwd then
+    return nil
+  end
+
+  if cwd.scheme == 'file' then
+    return normalize_file_path(cwd.file_path)
   end
 
   return nil
