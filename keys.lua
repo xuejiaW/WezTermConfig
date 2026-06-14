@@ -32,6 +32,20 @@ function M.apply_to_config(config)
         act.ActivateCopyMode,
         act.CopyMode 'ClearPattern'
     }
+    local copy_or_interrupt_action = wezterm.action_callback(function(window, pane)
+        local has_selection = window:get_selection_text_for_pane(pane) ~= ''
+
+        if has_selection then
+            window:perform_action(act.CopyTo 'Clipboard', pane)
+            window:perform_action(act.ClearSelection, pane)
+            return
+        end
+
+        window:perform_action(act.SendKey {
+            key = 'c',
+            mods = 'CTRL'
+        }, pane)
+    end)
 
     config.keys = { -- Disable WezTerm's default Alt+Enter fullscreen toggle.
     {
@@ -75,6 +89,26 @@ function M.apply_to_config(config)
         key = 'p',
         mods = platform.direct_mods,
         action = pane_actions.move_current_pane_to_new_tab()
+    }, -- Keep Ctrl+V as terminal-owned text paste even when an app/TUI reports
+    -- the key as lowercase. If it reaches Codex as a raw key, Codex treats it
+    -- as image paste instead of text paste.
+    {
+        key = 'v',
+        mods = platform.primary_mod,
+        action = act.PasteFrom 'Clipboard'
+    }, {
+        key = 'V',
+        mods = platform.primary_mod,
+        action = act.PasteFrom 'Clipboard'
+    }, -- Copy selected text, otherwise pass Ctrl+C through to the terminal app.
+    {
+        key = 'c',
+        mods = 'CTRL',
+        action = copy_or_interrupt_action
+    }, {
+        key = 'C',
+        mods = 'CTRL',
+        action = copy_or_interrupt_action
     }, -- On macOS, leave Cmd+W to terminal apps such as Neovim by explicitly
     -- overriding WezTerm's default close-tab binding. Windows keeps Ctrl+W as a
     -- terminal-tab close shortcut.
