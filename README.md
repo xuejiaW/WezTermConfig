@@ -3,6 +3,7 @@
 This repository contains the actively used WezTerm configuration from
 `~/.config/wezterm`.
 
+
 ## Layout
 
 - `wezterm.lua`: thin entrypoint that assembles the config
@@ -14,6 +15,7 @@ This repository contains the actively used WezTerm configuration from
 - `keys.lua`: keyboard bindings
 - `mouse.lua`: mouse behavior
 - `agent_status.lua`: agent-deck plugin setup and status helpers
+    - run `git config --global --add safe.directory C:\` on windows 
 - `status_area.lua`: right status contents for key tables and agent counts
 - `tab_rename.lua`: current-tab rename prompt event
 - `pane_actions.lua`: pane split and close behavior, including vim/neovim cleanup
