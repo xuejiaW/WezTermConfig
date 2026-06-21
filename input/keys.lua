@@ -6,6 +6,8 @@ local tab_rename = require 'features.tab_rename'
 
 local M = {}
 
+local mode_transition_delay_seconds = 0.01
+
 local function upsert_key_binding(bindings, entry)
     for index, binding in ipairs(bindings) do
         if binding.key == entry.key and binding.mods == entry.mods then
@@ -17,6 +19,11 @@ local function upsert_key_binding(bindings, entry)
     table.insert(bindings, entry)
 end
 
+local function clear_copy_search_state(window, pane)
+    window:perform_action(act.CopyMode 'ClearPattern', pane)
+    window:perform_action(act.CopyMode 'ClearSelectionMode', pane)
+end
+
 function M.apply_to_config(config)
     local default_key_tables = wezterm.gui.default_key_tables()
     local copy_mode = default_key_tables.copy_mode
@@ -24,14 +31,24 @@ function M.apply_to_config(config)
     local tab_close_action = platform.is_windows and act.CloseCurrentTab {
         confirm = true
     } or act.DisableDefaultAssignment
-    local fullscreen_mods = platform.is_windows and 'CTRL|SHIFT' or 'CMD|CTRL'
     local primary_shift_mods = platform.primary_mod .. '|SHIFT'
     local move_tab_mods = platform.direct_mods .. '|SHIFT'
     local disable_tab_number_mods = {platform.primary_mod, 'CTRL|SHIFT'}
-    local activate_copy_mode_action = act.Multiple {
-        act.ActivateCopyMode,
-        act.CopyMode 'ClearPattern'
-    }
+    local activate_copy_mode_action = wezterm.action_callback(function(window, pane)
+        window:perform_action(act.ActivateCopyMode, pane)
+
+        wezterm.time.call_after(mode_transition_delay_seconds, function()
+            clear_copy_search_state(window, pane)
+            window:perform_action(act.CopyMode 'AcceptPattern', pane)
+        end)
+    end)
+    local clear_search_and_return_to_copy_mode_action = wezterm.action_callback(function(window, pane)
+        window:perform_action(act.CopyMode 'AcceptPattern', pane)
+
+        wezterm.time.call_after(mode_transition_delay_seconds, function()
+            clear_copy_search_state(window, pane)
+        end)
+    end)
     local copy_or_interrupt_action = wezterm.action_callback(function(window, pane)
         local has_selection = window:get_selection_text_for_pane(pane) ~= ''
 
@@ -129,7 +146,7 @@ function M.apply_to_config(config)
         }
     }, {
         key = 'f',
-        mods = fullscreen_mods,
+        mods = platform.direct_mods,
         action = act.ToggleFullScreen
     }, {
         key = 'w',
@@ -159,7 +176,7 @@ function M.apply_to_config(config)
     }, {
         key = 'x',
         mods = 'CTRL|SHIFT',
-        action = activate_copy_mode_action
+        action = act.DisableDefaultAssignment
     }, -- Previous/next GUI tab.
     {
         key = 'h',
@@ -216,11 +233,6 @@ function M.apply_to_config(config)
         action = act.Search 'CurrentSelectionOrEmptyString'
     })
     upsert_key_binding(copy_mode, {
-        key = '/',
-        mods = 'SHIFT',
-        action = act.Search 'CurrentSelectionOrEmptyString'
-    })
-    upsert_key_binding(copy_mode, {
         key = 'L',
         mods = 'NONE',
         action = act.CopyMode 'MoveToEndOfLineContent'
@@ -228,18 +240,23 @@ function M.apply_to_config(config)
     upsert_key_binding(copy_mode, {
         key = 'n',
         mods = 'NONE',
-        action = act.CopyMode 'PriorMatch'
+        action = act.CopyMode 'NextMatch'
     })
     upsert_key_binding(copy_mode, {
         key = 'N',
         mods = 'NONE',
-        action = act.CopyMode 'NextMatch'
+        action = act.CopyMode 'PriorMatch'
     })
 
     upsert_key_binding(search_mode, {
         key = 'Enter',
         mods = 'NONE',
         action = act.CopyMode 'AcceptPattern'
+    })
+    upsert_key_binding(search_mode, {
+        key = 'Escape',
+        mods = 'NONE',
+        action = clear_search_and_return_to_copy_mode_action
     })
 
     config.key_tables = {

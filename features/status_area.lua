@@ -4,9 +4,9 @@ local agent_status = require 'features.agent_status'
 local M = {}
 
 local KEY_TABLE_LABELS = {
-  copy_mode = ' COPY  h/j/k/l/L  Esc clear/exit  / ? search  n/N match ',
+  copy_mode = ' COPY  h/j/k/l/L  Esc clear/exit  / search  n next  N prev ',
   resize_panes = ' RESIZE  h/j/k/l ',
-  search_mode = ' SEARCH  Enter back-to-copy  Ctrl-n/p next-prev ',
+  search_mode = ' SEARCH  Enter accept  Esc clear/back  Ctrl-n/p next-prev ',
 }
 
 local function append_agent_badge(elements, status, count, label)
