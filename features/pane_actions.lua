@@ -1,6 +1,6 @@
 local wezterm = require 'wezterm'
 local act = wezterm.action
-local launch_paths = require 'launch_paths'
+local launch_paths = require 'launch.paths'
 
 local M = {}
 M.close_pane_event = 'close-pane-with-editor-cleanup'

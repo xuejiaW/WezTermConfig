@@ -2,3 +2,4 @@
 *.swp
 *.swo
 *~
+launch/local_paths.lua

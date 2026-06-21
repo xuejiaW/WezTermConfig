@@ -1,4 +1,4 @@
-local launch_paths = require 'launch_paths'
+local launch_paths = require 'launch.paths'
 
 local M = {}
 

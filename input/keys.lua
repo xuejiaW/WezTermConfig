@@ -1,8 +1,8 @@
 local wezterm = require 'wezterm'
 local act = wezterm.action
 local platform = require 'platform'
-local pane_actions = require 'pane_actions'
-local tab_rename = require 'tab_rename'
+local pane_actions = require 'features.pane_actions'
+local tab_rename = require 'features.tab_rename'
 
 local M = {}
 

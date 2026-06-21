@@ -1,5 +1,5 @@
 local wezterm = require 'wezterm'
-local agent_status = require 'agent_status'
+local agent_status = require 'features.agent_status'
 
 local M = {}
 
